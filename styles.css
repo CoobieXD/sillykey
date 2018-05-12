@@ -1,0 +1,38 @@
+body {
+	font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+	margin: 0;
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #1a2e36;
+}
+
+.container {
+	background: #0c2028;
+	padding: 24px;
+	border-radius: 12px;
+	width: 280px;
+}
+
+.container input {
+	background: transparent;
+	border: 0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+	color: #c8dce4;
+	font-family: inherit;
+	font-size: 14px;
+	width: 100%;
+	margin: 8px 0;
+	padding: 6px 0;
+	box-sizing: border-box;
+}
+
+.container input:focus {
+	outline: none;
+	border-bottom-color: rgba(255, 255, 255, 0.5);
+}
+
+.container input::placeholder {
+	color: rgba(255, 255, 255, 0.3);
+}
