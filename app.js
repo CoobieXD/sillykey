@@ -6,6 +6,23 @@
 	const passwordEl = $('#password');
 	let worker = null;
 
+	function hex2ascii(s) {
+		const hex = s.toString();
+		let str = '';
+		for (let n = 0; n < hex.length; n += 2) {
+			str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+		}
+		return str;
+	}
+
+	function base58_encode(text) {
+		const bytes = [];
+		for (let i = 0; i < text.length; i++) {
+			bytes.push(text[i].charCodeAt(0));
+		}
+		return Base58.encode(bytes);
+	}
+
 	function generateLegacy(master, service) {
 		return new Promise((resolve) => {
 			if (worker) worker.terminate();
@@ -13,7 +30,8 @@
 			const keys = master + service + 'why not?';
 			worker.postMessage(keys);
 			worker.onmessage = function (e) {
-				resolve(e.data.substr(0, 24));
+				const pass = base58_encode(hex2ascii(e.data));
+				resolve(pass.substr(0, 24));
 			};
 		});
 	}
