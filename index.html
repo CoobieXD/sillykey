@@ -8,8 +8,18 @@
 <body>
 	<div class="container">
 		<input id="master" type="password" placeholder="master" autocomplete="off">
-		<input id="service" type="text" placeholder="service" autocomplete="off">
-		<input id="password" type="text" value="" placeholder="password" readonly>
+		<div class="input-row">
+			<div class="service-col">
+				<input id="service" type="text" placeholder="service" autocomplete="off">
+			</div>
+			<div class="year-col">
+				<select id="year"></select>
+			</div>
+		</div>
+		<div class="password-row">
+			<input id="password" type="text" value="" placeholder="password" readonly>
+			<button class="btn-copy" id="btn-copy" type="button">Copy</button>
+		</div>
 	</div>
 
 	<script src="sha256.min.js"></script>
