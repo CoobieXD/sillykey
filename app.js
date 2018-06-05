@@ -6,6 +6,7 @@
 	const serviceEl = $('#service');
 	const yearEl = $('#year');
 	const passwordEl = $('#password');
+	const hashIconEl = $('#hash_icon');
 	const btnCopy = $('#btn-copy');
 	let worker = null;
 
@@ -39,6 +40,24 @@
 		});
 	}
 
+	function updateIdenticon(master) {
+		if (!master) {
+			hashIconEl.style.display = 'none';
+			return;
+		}
+		const options = {
+			size: 16,
+			margin: 0,
+			foreground: [16, 40, 48, 255],
+			background: [0, 0, 0, 0],
+			saturation: 0.5,
+			format: 'svg'
+		};
+		const data = new Identicon(sha256(master), options).toString();
+		hashIconEl.src = 'data:image/svg+xml;base64,' + data;
+		hashIconEl.style.display = 'block';
+	}
+
 	async function copyText(text) {
 		if (!text) return;
 		try {
@@ -70,6 +89,7 @@
 		const master = masterEl.value;
 		const service = serviceEl.value;
 		const year = yearEl.value;
+		updateIdenticon(master);
 		if (!master || !service) { passwordEl.value = ''; return; }
 		const pass = await generateLegacy(master, service, year);
 		passwordEl.value = pass;

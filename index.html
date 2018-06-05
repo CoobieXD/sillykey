@@ -8,7 +8,10 @@
 <body>
 	<div id="car_key">
 		<div id="car_key_display">
-			<input id="master" type="password" placeholder="master" autocomplete="off">
+			<div class="master-row">
+				<input id="master" type="password" placeholder="master" autocomplete="off">
+				<img id="hash_icon" src="" alt="">
+			</div>
 			<div class="input-row">
 				<div class="service-col">
 					<input id="service" type="text" placeholder="service" autocomplete="off">
@@ -26,6 +29,7 @@
 
 	<script src="sha256.min.js"></script>
 	<script src="base58.js"></script>
+	<script src="identicon.js"></script>
 	<script src="app.js"></script>
 </body>
 </html>
