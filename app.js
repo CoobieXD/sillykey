@@ -58,6 +58,37 @@
 		hashIconEl.style.display = 'block';
 	}
 
+	// --- Background gradient fingerprint (crossfade) ---
+	const bgA = $('#bg-a');
+	const bgB = $('#bg-b');
+	let bgCurrent = 'a';
+
+	function buildGradient(hash) {
+		const h1 = parseInt(hash.substr(0, 3), 16) % 360;
+		const h2 = parseInt(hash.substr(3, 3), 16) % 360;
+		const h3 = parseInt(hash.substr(6, 3), 16) % 360;
+		const x1 = parseInt(hash.substr(9, 2), 16) % 80 + 10;
+		const y1 = parseInt(hash.substr(11, 2), 16) % 80 + 10;
+		const x2 = parseInt(hash.substr(13, 2), 16) % 80 + 10;
+		const y2 = parseInt(hash.substr(15, 2), 16) % 80 + 10;
+		return `radial-gradient(ellipse at ${x1}% ${y1}%, hsla(${h1}, 80%, 65%, 0.5) 0%, transparent 55%),
+			radial-gradient(ellipse at ${x2}% ${y2}%, hsla(${h2}, 70%, 60%, 0.4) 0%, transparent 50%),
+			linear-gradient(${h3}deg, hsla(${h1}, 50%, 85%, 1), hsla(${h2}, 45%, 80%, 1))`;
+	}
+
+	function updateBackground(master) {
+		const next = bgCurrent === 'a' ? bgB : bgA;
+		const prev = bgCurrent === 'a' ? bgA : bgB;
+		if (!master) {
+			next.style.background = 'radial-gradient(ellipse at 30% 40%, rgba(135,206,235,0.6) 0%, transparent 60%), radial-gradient(ellipse at 70% 60%, rgba(173,216,230,0.5) 0%, transparent 55%), #b8d4e3';
+		} else {
+			next.style.background = buildGradient(sha256(master));
+		}
+		next.style.opacity = '1';
+		prev.style.opacity = '0';
+		bgCurrent = bgCurrent === 'a' ? 'b' : 'a';
+	}
+
 	async function copyText(text) {
 		if (!text) return;
 		try {
@@ -90,6 +121,7 @@
 		const service = serviceEl.value;
 		const year = yearEl.value;
 		updateIdenticon(master);
+		updateBackground(master);
 		if (!master || !service) { passwordEl.value = ''; return; }
 		const pass = await generateLegacy(master, service, year);
 		passwordEl.value = pass;
