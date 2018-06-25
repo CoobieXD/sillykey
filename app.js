@@ -1,13 +1,17 @@
 (function () {
 	'use strict';
 	const PASSWORD_LENGTH = 24;
+	const CLEAR_TIMEOUT = 300;
+	const LEGACY_SALT = 'why not?';
+
 	const $ = (sel) => document.querySelector(sel);
-	const masterEl = $('#master');
-	const serviceEl = $('#service');
+	let masterEl = $('#master');
+	let serviceEl = $('#service');
 	const yearEl = $('#year');
 	const passwordEl = $('#password');
 	const hashIconEl = $('#hash_icon');
 	const btnCopy = $('#btn-copy');
+	let clearTimer = null;
 	let worker = null;
 
 	function hex2ascii(s) {
@@ -31,7 +35,7 @@
 		return new Promise((resolve) => {
 			if (worker) worker.terminate();
 			worker = new Worker('worker.js');
-			const keys = master + service + year + 'why not?';
+			const keys = master + service + year + LEGACY_SALT;
 			worker.postMessage(keys);
 			worker.onmessage = function (e) {
 				const pass = base58_encode(hex2ascii(e.data));
@@ -58,7 +62,6 @@
 		hashIconEl.style.display = 'block';
 	}
 
-	// --- Background gradient fingerprint (crossfade) ---
 	const bgA = $('#bg-a');
 	const bgB = $('#bg-b');
 	let bgCurrent = 'a';
@@ -116,15 +119,39 @@
 		}
 	}
 
+	function purgeInput(el) {
+		const fresh = el.cloneNode(false);
+		el.parentNode.replaceChild(fresh, el);
+		return fresh;
+	}
+
+	function clearAll() {
+		masterEl = purgeInput(masterEl);
+		serviceEl = purgeInput(serviceEl);
+		passwordEl.value = '';
+		hashIconEl.style.display = 'none';
+		if (worker) { worker.terminate(); worker = null; }
+		masterEl.addEventListener('input', generate);
+		serviceEl.addEventListener('input', generate);
+	}
+
 	async function generate() {
+		if (clearTimer) clearTimeout(clearTimer);
+		clearTimer = setTimeout(clearAll, CLEAR_TIMEOUT * 1000);
+
 		const master = masterEl.value;
 		const service = serviceEl.value;
 		const year = yearEl.value;
 		updateIdenticon(master);
 		updateBackground(master);
 		if (!master || !service) { passwordEl.value = ''; return; }
-		const pass = await generateLegacy(master, service, year);
-		passwordEl.value = pass;
+		try {
+			const pass = await generateLegacy(master, service, year);
+			passwordEl.value = pass;
+		} catch (err) {
+			console.error('Generation error:', err);
+			passwordEl.value = '';
+		}
 	}
 
 	function init() {
@@ -133,6 +160,12 @@
 		serviceEl.addEventListener('input', generate);
 		yearEl.addEventListener('change', generate);
 		btnCopy.addEventListener('click', () => copyText(passwordEl.value));
+
+		document.addEventListener('visibilitychange', () => {
+			if (document.hidden) clearAll();
+		});
+
+		clearTimer = setTimeout(clearAll, CLEAR_TIMEOUT * 1000);
 	}
 	init();
 })();
