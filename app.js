@@ -8,11 +8,14 @@
 	let masterEl = $('#master');
 	let serviceEl = $('#service');
 	const yearEl = $('#year');
+	const methodEl = $('#method');
 	const passwordEl = $('#password');
 	const hashIconEl = $('#hash_icon');
 	const btnCopy = $('#btn-copy');
 	let clearTimer = null;
 	let worker = null;
+
+	const encoder = new TextEncoder();
 
 	function hex2ascii(s) {
 		const hex = s.toString();
@@ -31,6 +34,18 @@
 		return Base58.encode(bytes);
 	}
 
+	function arrayBufferToBase64url(buffer) {
+		const bytes = new Uint8Array(buffer);
+		let binary = '';
+		for (let i = 0; i < bytes.length; i++) {
+			binary += String.fromCharCode(bytes[i]);
+		}
+		return btoa(binary)
+			.replace(/\+/g, '-')
+			.replace(/\//g, '_')
+			.replace(/=+$/, '');
+	}
+
 	function generateLegacy(master, service, year) {
 		return new Promise((resolve) => {
 			if (worker) worker.terminate();
@@ -42,6 +57,16 @@
 				resolve(pass.substr(0, PASSWORD_LENGTH));
 			};
 		});
+	}
+
+	async function generateHMAC(master, service, year) {
+		const keyData = encoder.encode(master);
+		const msgData = encoder.encode(service + ':' + year);
+		const key = await crypto.subtle.importKey(
+			'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+		);
+		const sig = await crypto.subtle.sign('HMAC', key, msgData);
+		return arrayBufferToBase64url(sig).substr(0, PASSWORD_LENGTH);
 	}
 
 	function updateIdenticon(master) {
@@ -142,11 +167,17 @@
 		const master = masterEl.value;
 		const service = serviceEl.value;
 		const year = yearEl.value;
+		const method = methodEl.value;
 		updateIdenticon(master);
 		updateBackground(master);
 		if (!master || !service) { passwordEl.value = ''; return; }
 		try {
-			const pass = await generateLegacy(master, service, year);
+			let pass;
+			if (method === 'hmac') {
+				pass = await generateHMAC(master, service, year);
+			} else {
+				pass = await generateLegacy(master, service, year);
+			}
 			passwordEl.value = pass;
 		} catch (err) {
 			console.error('Generation error:', err);
@@ -159,6 +190,7 @@
 		masterEl.addEventListener('input', generate);
 		serviceEl.addEventListener('input', generate);
 		yearEl.addEventListener('change', generate);
+		methodEl.addEventListener('change', generate);
 		btnCopy.addEventListener('click', () => copyText(passwordEl.value));
 
 		document.addEventListener('visibilitychange', () => {

@@ -11,10 +11,18 @@
 
 	<div id="car_key">
 		<div id="car_key_display">
+			<div class="method-row">
+				<select id="method">
+					<option value="legacy">Legacy</option>
+					<option value="hmac">HMAC</option>
+				</select>
+			</div>
+
 			<div class="master-row">
 				<input id="master" type="password" placeholder="master" autocomplete="off">
 				<img id="hash_icon" src="" alt="">
 			</div>
+
 			<div class="input-row">
 				<div class="service-col">
 					<input id="service" type="text" placeholder="service" autocomplete="off">
@@ -23,6 +31,7 @@
 					<select id="year"></select>
 				</div>
 			</div>
+
 			<div class="password-row">
 				<input id="password" type="text" value="" placeholder="password" readonly>
 				<button class="btn-copy" id="btn-copy" type="button">Copy</button>

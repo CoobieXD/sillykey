@@ -145,3 +145,21 @@ body {
 .btn-copy:hover {
 	opacity: 0.8;
 }
+
+/* === Method Selector === */
+.method-row {
+	display: flex;
+	gap: 4px;
+	align-items: center;
+	margin-bottom: 2px;
+}
+
+.method-row select {
+	flex: 1;
+	margin: 0 0 6px;
+	font-size: 11px;
+	color: #0e2830;
+	background: transparent;
+	cursor: pointer;
+	letter-spacing: 0.5px;
+}
