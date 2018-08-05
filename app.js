@@ -12,6 +12,9 @@
 	const passwordEl = $('#password');
 	const hashIconEl = $('#hash_icon');
 	const btnCopy = $('#btn-copy');
+	const btnCopyBash = $('#btn-copy-bash');
+	const bashFormulaEl = $('.bash-formula');
+	const bashCodeEl = $('#bash-code');
 	let clearTimer = null;
 	let worker = null;
 
@@ -117,6 +120,16 @@
 		bgCurrent = bgCurrent === 'a' ? 'b' : 'a';
 	}
 
+	function updateBashFormula(method, service, year) {
+		if (method === 'hmac' && service) {
+			const cmd = ` echo -n "${service}:${year}" | openssl dgst -sha256 -hmac "YOUR_MASTER" -binary | base64 | tr '+/' '-_' | head -c ${PASSWORD_LENGTH}`;
+			bashCodeEl.textContent = cmd;
+			bashFormulaEl.classList.add('visible');
+		} else {
+			bashFormulaEl.classList.remove('visible');
+		}
+	}
+
 	async function copyText(text) {
 		if (!text) return;
 		try {
@@ -155,6 +168,7 @@
 		serviceEl = purgeInput(serviceEl);
 		passwordEl.value = '';
 		hashIconEl.style.display = 'none';
+		bashFormulaEl.classList.remove('visible');
 		if (worker) { worker.terminate(); worker = null; }
 		masterEl.addEventListener('input', generate);
 		serviceEl.addEventListener('input', generate);
@@ -170,6 +184,7 @@
 		const method = methodEl.value;
 		updateIdenticon(master);
 		updateBackground(master);
+		updateBashFormula(method, service, year);
 		if (!master || !service) { passwordEl.value = ''; return; }
 		try {
 			let pass;
@@ -192,6 +207,7 @@
 		yearEl.addEventListener('change', generate);
 		methodEl.addEventListener('change', generate);
 		btnCopy.addEventListener('click', () => copyText(passwordEl.value));
+		btnCopyBash.addEventListener('click', () => copyText(bashCodeEl.textContent));
 
 		document.addEventListener('visibilitychange', () => {
 			if (document.hidden) clearAll();

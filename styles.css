@@ -163,3 +163,57 @@ body {
 	cursor: pointer;
 	letter-spacing: 0.5px;
 }
+
+/* === Bash Formula === */
+.bash-formula {
+	display: none;
+	margin-top: 16px;
+	width: 300px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.bash-formula.visible {
+	display: block;
+}
+
+.bash-formula-label {
+	font-size: 9px;
+	color: rgba(255, 255, 255, 0.25);
+	margin-bottom: 6px;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+}
+
+.bash-formula-code {
+	background: rgba(0, 0, 0, 0.4);
+	color: #6abfb0;
+	font-family: inherit;
+	font-size: 10px;
+	padding: 10px 28px 10px 12px;
+	border-radius: 8px;
+	word-break: break-all;
+	line-height: 1.6;
+	position: relative;
+	border: 1px solid rgba(255, 255, 255, 0.04);
+	box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.bash-formula-code .btn-copy-bash {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	background: none;
+	border: none;
+	color: #6abfb0;
+	cursor: pointer;
+	opacity: 0.35;
+	padding: 2px;
+	font-family: inherit;
+	font-size: 9px;
+	transition: opacity 0.15s;
+}
+
+.bash-formula-code .btn-copy-bash:hover {
+	opacity: 0.8;
+}
