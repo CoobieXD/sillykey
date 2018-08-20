@@ -11,6 +11,7 @@
 	const methodEl = $('#method');
 	const passwordEl = $('#password');
 	const hashIconEl = $('#hash_icon');
+	const btnEye = $('#btn-eye');
 	const btnCopy = $('#btn-copy');
 	const btnCopyBash = $('#btn-copy-bash');
 	const bashFormulaEl = $('.bash-formula');
@@ -19,6 +20,17 @@
 	let worker = null;
 
 	const encoder = new TextEncoder();
+
+	const SVG_EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+	const SVG_EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+	const SVG_COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+
+	let masterVisible = false;
+	function toggleMasterVisibility() {
+		masterVisible = !masterVisible;
+		masterEl.type = masterVisible ? 'text' : 'password';
+		btnEye.innerHTML = masterVisible ? SVG_EYE_OFF : SVG_EYE;
+	}
 
 	function hex2ascii(s) {
 		const hex = s.toString();
@@ -202,10 +214,15 @@
 
 	function init() {
 		initYearSelector();
+		btnEye.innerHTML = SVG_EYE;
+		btnCopy.innerHTML = SVG_COPY;
+		btnCopyBash.innerHTML = SVG_COPY;
+
 		masterEl.addEventListener('input', generate);
 		serviceEl.addEventListener('input', generate);
 		yearEl.addEventListener('change', generate);
 		methodEl.addEventListener('change', generate);
+		btnEye.addEventListener('click', toggleMasterVisibility);
 		btnCopy.addEventListener('click', () => copyText(passwordEl.value));
 		btnCopyBash.addEventListener('click', () => copyText(bashCodeEl.textContent));
 

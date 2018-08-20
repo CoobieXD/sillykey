@@ -73,6 +73,8 @@ body {
 	box-sizing: border-box;
 	-webkit-appearance: none;
 	appearance: none;
+	position: relative;
+	z-index: 2;
 }
 
 #car_key_display input:focus,
@@ -100,52 +102,6 @@ body {
 	flex: 3;
 }
 
-/* === Master Password Row === */
-.master-row {
-	position: relative;
-}
-
-#hash_icon {
-	position: absolute;
-	width: 16px;
-	height: 16px;
-	top: 7px;
-	right: 4px;
-	border: none;
-	display: none;
-	z-index: 3;
-	border-radius: 2px;
-}
-
-/* === Password Output === */
-.password-row {
-	position: relative;
-}
-
-.password-row input {
-	font-weight: 600;
-	letter-spacing: 0.3px;
-}
-
-.btn-copy {
-	background: transparent;
-	border: 0;
-	color: #0e2830;
-	cursor: pointer;
-	font-family: inherit;
-	font-size: 10px;
-	padding: 2px 6px;
-	position: absolute;
-	right: 0;
-	top: 4px;
-	opacity: 0.4;
-	z-index: 3;
-}
-
-.btn-copy:hover {
-	opacity: 0.8;
-}
-
 /* === Method Selector === */
 .method-row {
 	display: flex;
@@ -162,6 +118,68 @@ body {
 	background: transparent;
 	cursor: pointer;
 	letter-spacing: 0.5px;
+}
+
+/* === Master Password Row === */
+.master-row {
+	position: relative;
+}
+
+.master-row input {
+	padding-right: 46px !important;
+}
+
+#hash_icon {
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	top: 7px;
+	right: 26px;
+	border: none;
+	display: none;
+	z-index: 3;
+	border-radius: 2px;
+}
+
+/* === Icon Buttons === */
+.btn-icon {
+	background: transparent;
+	border: 0;
+	color: #0e2830;
+	cursor: pointer;
+	padding: 0;
+	position: absolute;
+	top: 5px;
+	right: 4px;
+	width: 18px;
+	height: 18px;
+	opacity: 0.4;
+	z-index: 3;
+	transition: opacity 0.15s;
+}
+
+.btn-icon:hover {
+	opacity: 0.8;
+}
+
+.btn-icon svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* === Password Output === */
+.password-row {
+	position: relative;
+}
+
+.password-row input {
+	padding-right: 46px !important;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+}
+
+.password-row .btn-copy {
+	right: 4px;
 }
 
 /* === Bash Formula === */
@@ -209,8 +227,6 @@ body {
 	cursor: pointer;
 	opacity: 0.35;
 	padding: 2px;
-	font-family: inherit;
-	font-size: 9px;
 	transition: opacity 0.15s;
 }
 

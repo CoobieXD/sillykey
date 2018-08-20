@@ -21,6 +21,7 @@
 			<div class="master-row">
 				<input id="master" type="password" placeholder="master" autocomplete="off">
 				<img id="hash_icon" src="" alt="">
+				<button class="btn-icon" id="btn-eye" type="button" aria-label="Toggle password visibility"></button>
 			</div>
 
 			<div class="input-row">
@@ -34,7 +35,7 @@
 
 			<div class="password-row">
 				<input id="password" type="text" value="" placeholder="password" readonly>
-				<button class="btn-copy" id="btn-copy" type="button">Copy</button>
+				<button class="btn-icon btn-copy" id="btn-copy" type="button" aria-label="Copy password"></button>
 			</div>
 		</div>
 	</div>
@@ -43,7 +44,7 @@
 		<div class="bash-formula-label">bash equivalent:</div>
 		<div class="bash-formula-code">
 			<code id="bash-code"></code>
-			<button class="btn-copy-bash" id="btn-copy-bash" type="button">Copy</button>
+			<button class="btn-copy-bash" id="btn-copy-bash" type="button" aria-label="Copy bash command"></button>
 		</div>
 	</div>
 
