@@ -18,8 +18,39 @@
 	const bashCodeEl = $('#bash-code');
 	let clearTimer = null;
 	let worker = null;
+	let hashAnimationId = null;
 
 	const encoder = new TextEncoder();
+
+	const ALPHABET_BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+	const ALPHABET_BASE64URL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
+	function randomString(alphabet, len) {
+		const buf = new Uint8Array(len);
+		crypto.getRandomValues(buf);
+		let result = '';
+		for (let i = 0; i < len; i++) {
+			result += alphabet[buf[i] % alphabet.length];
+		}
+		return result;
+	}
+
+	function startHashAnimation(method) {
+		stopHashAnimation();
+		const alphabet = method === 'legacy' ? ALPHABET_BASE58 : ALPHABET_BASE64URL;
+		const step = () => {
+			passwordEl.value = randomString(alphabet, PASSWORD_LENGTH);
+			hashAnimationId = requestAnimationFrame(step);
+		};
+		hashAnimationId = requestAnimationFrame(step);
+	}
+
+	function stopHashAnimation() {
+		if (hashAnimationId !== null) {
+			cancelAnimationFrame(hashAnimationId);
+			hashAnimationId = null;
+		}
+	}
 
 	const SVG_EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 	const SVG_EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
@@ -181,6 +212,7 @@
 		passwordEl.value = '';
 		hashIconEl.style.display = 'none';
 		bashFormulaEl.classList.remove('visible');
+		stopHashAnimation();
 		if (worker) { worker.terminate(); worker = null; }
 		masterEl.addEventListener('input', generate);
 		serviceEl.addEventListener('input', generate);
@@ -197,7 +229,12 @@
 		updateIdenticon(master);
 		updateBackground(master);
 		updateBashFormula(method, service, year);
-		if (!master || !service) { passwordEl.value = ''; return; }
+		if (!master || !service) {
+			stopHashAnimation();
+			passwordEl.value = '';
+			return;
+		}
+		startHashAnimation(method);
 		try {
 			let pass;
 			if (method === 'hmac') {
@@ -205,9 +242,11 @@
 			} else {
 				pass = await generateLegacy(master, service, year);
 			}
+			stopHashAnimation();
 			passwordEl.value = pass;
 		} catch (err) {
 			console.error('Generation error:', err);
+			stopHashAnimation();
 			passwordEl.value = '';
 		}
 	}
