@@ -234,6 +234,7 @@
 			passwordEl.value = '';
 			return;
 		}
+		// Start animation before async crypto
 		startHashAnimation(method);
 		try {
 			let pass;
