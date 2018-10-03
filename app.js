@@ -18,6 +18,7 @@
 	const bashCodeEl = $('#bash-code');
 	let clearTimer = null;
 	let worker = null;
+	let debounceTimer = null;
 	let hashAnimationId = null;
 
 	const encoder = new TextEncoder();
@@ -214,14 +215,12 @@
 		bashFormulaEl.classList.remove('visible');
 		stopHashAnimation();
 		if (worker) { worker.terminate(); worker = null; }
-		masterEl.addEventListener('input', generate);
-		serviceEl.addEventListener('input', generate);
+		if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
+		masterEl.addEventListener('input', onInputChange);
+		serviceEl.addEventListener('input', onInputChange);
 	}
 
 	async function generate() {
-		if (clearTimer) clearTimeout(clearTimer);
-		clearTimer = setTimeout(clearAll, CLEAR_TIMEOUT * 1000);
-
 		const master = masterEl.value;
 		const service = serviceEl.value;
 		const year = yearEl.value;
@@ -234,8 +233,6 @@
 			passwordEl.value = '';
 			return;
 		}
-		// Start animation before async crypto
-		startHashAnimation(method);
 		try {
 			let pass;
 			if (method === 'hmac') {
@@ -252,16 +249,33 @@
 		}
 	}
 
+	function onInputChange() {
+		if (clearTimer) clearTimeout(clearTimer);
+		clearTimer = setTimeout(clearAll, CLEAR_TIMEOUT * 1000);
+
+		const method = methodEl.value;
+		if (masterEl.value && serviceEl.value) {
+			startHashAnimation(method);
+		} else {
+			stopHashAnimation();
+			passwordEl.value = '';
+		}
+
+		if (debounceTimer) clearTimeout(debounceTimer);
+		const delay = method === 'legacy' ? 300 : 50;
+		debounceTimer = setTimeout(generate, delay);
+	}
+
 	function init() {
 		initYearSelector();
 		btnEye.innerHTML = SVG_EYE;
 		btnCopy.innerHTML = SVG_COPY;
 		btnCopyBash.innerHTML = SVG_COPY;
 
-		masterEl.addEventListener('input', generate);
-		serviceEl.addEventListener('input', generate);
-		yearEl.addEventListener('change', generate);
-		methodEl.addEventListener('change', generate);
+		masterEl.addEventListener('input', onInputChange);
+		serviceEl.addEventListener('input', onInputChange);
+		yearEl.addEventListener('change', onInputChange);
+		methodEl.addEventListener('change', onInputChange);
 		btnEye.addEventListener('click', toggleMasterVisibility);
 		btnCopy.addEventListener('click', () => copyText(passwordEl.value));
 		btnCopyBash.addEventListener('click', () => copyText(bashCodeEl.textContent));
