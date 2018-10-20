@@ -233,3 +233,23 @@ body {
 .bash-formula-code .btn-copy-bash:hover {
 	opacity: 0.8;
 }
+
+/* === Status Bar === */
+#status_bar {
+	font-size: 8px;
+	color: rgba(16, 40, 48, 0.7);
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	margin-bottom: 4px;
+	position: relative;
+	z-index: 2;
+}
+
+#status_bar .status-right {
+	margin-left: auto;
+}
+
+#status_bar svg {
+	opacity: 0.6;
+}

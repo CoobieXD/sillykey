@@ -56,6 +56,9 @@
 	const SVG_EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 	const SVG_EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 	const SVG_COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+	const SVG_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+	const SVG_SIGNAL = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="1" y="14" width="4" height="8" rx="1"/><rect x="7" y="10" width="4" height="12" rx="1"/><rect x="13" y="6" width="4" height="16" rx="1"/><rect x="19" y="2" width="4" height="20" rx="1"/></svg>';
+	const SVG_BATTERY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="10" x2="23" y2="14"/><rect x="3" y="8" width="4" height="8" fill="currentColor" rx="0.5"/><rect x="8" y="8" width="4" height="8" fill="currentColor" rx="0.5"/><rect x="13" y="8" width="4" height="8" fill="currentColor" rx="0.5"/></svg>';
 
 	let masterVisible = false;
 	function toggleMasterVisibility() {
@@ -271,6 +274,11 @@
 		btnEye.innerHTML = SVG_EYE;
 		btnCopy.innerHTML = SVG_COPY;
 		btnCopyBash.innerHTML = SVG_COPY;
+
+		const statusBar = $('#status_bar');
+		statusBar.querySelector('.icon-signal').innerHTML = SVG_SIGNAL;
+		statusBar.querySelector('.icon-lock').innerHTML = SVG_LOCK;
+		statusBar.querySelector('.icon-battery').innerHTML = SVG_BATTERY;
 
 		masterEl.addEventListener('input', onInputChange);
 		serviceEl.addEventListener('input', onInputChange);
