@@ -16,6 +16,7 @@
 	const btnCopyBash = $('#btn-copy-bash');
 	const bashFormulaEl = $('.bash-formula');
 	const bashCodeEl = $('#bash-code');
+	const copyFeedback = $('#copy-feedback');
 	let clearTimer = null;
 	let worker = null;
 	let debounceTimer = null;
@@ -181,6 +182,7 @@
 		if (!text) return;
 		try {
 			await navigator.clipboard.writeText(text);
+			showCopyFeedback();
 		} catch {
 			const ta = document.createElement('textarea');
 			ta.value = text;
@@ -190,7 +192,14 @@
 			ta.select();
 			document.execCommand('copy');
 			document.body.removeChild(ta);
+			showCopyFeedback();
 		}
+	}
+
+	function showCopyFeedback(text) {
+		copyFeedback.textContent = text || 'Copied';
+		copyFeedback.classList.add('show');
+		setTimeout(() => copyFeedback.classList.remove('show'), 1200);
 	}
 
 	function initYearSelector() {

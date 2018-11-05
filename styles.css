@@ -253,3 +253,28 @@ body {
 #status_bar svg {
 	opacity: 0.6;
 }
+
+/* === Copy Feedback Toast === */
+#copy-feedback {
+	position: fixed;
+	top: 24px;
+	left: 50%;
+	transform: translateX(-50%) translateY(-8px);
+	background: rgba(16, 40, 48, 0.95);
+	color: #6abfb0;
+	padding: 8px 20px;
+	border-radius: 8px;
+	font-size: 12px;
+	font-family: inherit;
+	opacity: 0;
+	transition: opacity 0.25s, transform 0.25s;
+	pointer-events: none;
+	z-index: 100;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+	border: 1px solid rgba(106, 191, 176, 0.15);
+}
+
+#copy-feedback.show {
+	opacity: 1;
+	transform: translateX(-50%) translateY(0);
+}
