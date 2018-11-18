@@ -278,3 +278,29 @@ body {
 	opacity: 1;
 	transform: translateX(-50%) translateY(0);
 }
+
+/* === Generating Indicator === */
+.generating-indicator {
+	display: none;
+	font-size: 9px;
+	color: rgba(16, 40, 48, 0.5);
+	padding: 2px 0 0;
+	position: relative;
+	z-index: 2;
+}
+
+.generating-indicator.active {
+	display: block;
+}
+
+.generating-indicator::after {
+	content: '';
+	animation: dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes dots {
+	0% { content: ''; }
+	25% { content: '.'; }
+	50% { content: '..'; }
+	75% { content: '...'; }
+}
