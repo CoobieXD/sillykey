@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
 	<title>SillyKey</title>
+	<link rel="icon" href="favicon.png" sizes="16x16">
+	<link rel="apple-touch-icon" href="apple-touch-icon.png">
+	<meta name="apple-mobile-web-app-title" content="SillyKey">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 	<link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -29,14 +35,14 @@
 			</div>
 
 			<div class="master-row">
-				<input id="master" type="password" placeholder="master" autocomplete="off">
+				<input id="master" type="password" placeholder="master" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 				<img id="hash_icon" src="" alt="">
 				<button class="btn-icon" id="btn-eye" type="button" aria-label="Toggle password visibility"></button>
 			</div>
 
 			<div class="input-row">
 				<div class="service-col">
-					<input id="service" type="text" placeholder="service" autocomplete="off">
+					<input id="service" type="text" placeholder="service" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 				</div>
 				<div class="year-col">
 					<select id="year"></select>
@@ -44,7 +50,7 @@
 			</div>
 
 			<div class="password-row">
-				<input id="password" type="text" value="" placeholder="password" readonly>
+				<input id="password" type="text" value="" placeholder="password" autocomplete="off" readonly>
 				<button class="btn-icon btn-copy" id="btn-copy" type="button" aria-label="Copy password"></button>
 			</div>
 
