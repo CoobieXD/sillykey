@@ -304,3 +304,33 @@ body {
 	50% { content: '..'; }
 	75% { content: '...'; }
 }
+
+/* === Mobile === */
+@media only screen and (max-width: 720px) {
+	body {
+		background: #b8d4e3;
+	}
+
+	#car_key {
+		border: none;
+		border-radius: 20px;
+		width: calc(100% - 32px);
+		margin: 60px auto 0;
+		box-sizing: border-box;
+		padding: 18px;
+		box-shadow:
+			0 12px 40px rgba(0, 0, 0, 0.6),
+			inset 0 1px 0 rgba(255, 255, 255, 0.06);
+	}
+
+	#car_key_display input,
+	#car_key_display select {
+		font-size: 16px;
+		padding: 4px 0;
+	}
+
+	.bash-formula {
+		width: calc(100% - 32px);
+		margin: 16px auto 0;
+	}
+}
