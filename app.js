@@ -5,7 +5,7 @@
 	const PASSWORD_LENGTH = 24;
 	const CLEAR_TIMEOUT = 300;
 	const LEGACY_SALT = 'why not?';
-	const PBKDF2_ITERATIONS = 600000;
+	const PBKDF2_ITERATIONS = 1000000;
 	const PBKDF2_SALT_PREFIX = 'sillykey:';
 
 	// --- DOM refs ---
