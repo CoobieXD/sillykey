@@ -334,3 +334,7 @@ body {
 		margin: 16px auto 0;
 	}
 }
+
+.password-row .btn-dice {
+	right: 22px;
+}
