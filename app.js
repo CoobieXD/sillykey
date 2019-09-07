@@ -156,6 +156,7 @@
 	// --- Clear ---
 	function purgeInput(el) { const fresh = el.cloneNode(false); el.parentNode.replaceChild(fresh, el); return fresh; }
 	function clearAll() {
+		// Save password before clearing to check clipboard
 		const lastPassword = passwordEl.value;
 		masterEl = purgeInput(masterEl); serviceEl = purgeInput(serviceEl);
 		passwordEl.value = ''; hashIconEl.style.display = 'none';
