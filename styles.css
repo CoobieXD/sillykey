@@ -28,6 +28,7 @@ body {
 #bg-b { opacity: 0; }
 
 /* === Car Key Fob Body === */
+
 #car_key {
 	background: linear-gradient(145deg, #1e3a44, #0c2028);
 	border: 1px solid rgba(255, 255, 255, 0.05);
