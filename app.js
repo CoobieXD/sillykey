@@ -234,7 +234,7 @@
 		btnCopy.addEventListener('click', () => copyText(passwordEl.value));
 		btnCopyBash.addEventListener('click', () => copyText(bashCodeEl.textContent));
 		passwordEl.addEventListener('click', function () { this.select(); });
-		document.body.addEventListener('click', (e) => {
+		// Clear clipboard on background click		document.body.addEventListener('click', (e) => {
 			if (e.target === document.body || e.target.classList.contains('bg-layer')) {
 				navigator.clipboard.writeText('').then(() => showCopyFeedback('Clipboard cleared'));
 			}
