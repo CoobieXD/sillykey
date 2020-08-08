@@ -80,6 +80,7 @@
 	// --- Generation methods ---
 	function generateLegacy(master, service, year) {
 		return new Promise((resolve) => {
+			// Always recreate worker to cancel previous computation
 			if (worker) worker.terminate();
 			worker = new Worker('worker.js');
 			const keys = master + service + year + LEGACY_SALT;
