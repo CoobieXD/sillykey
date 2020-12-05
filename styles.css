@@ -76,6 +76,7 @@ body {
 	appearance: none;
 	position: relative;
 	z-index: 2;
+	transition: border-color 0.2s;
 }
 
 #car_key_display input:focus,
@@ -87,6 +88,31 @@ body {
 #car_key_display input::placeholder {
 	color: #3a5660;
 	font-weight: 400;
+}
+
+#car_key_display input::selection {
+	background: rgba(16, 40, 48, 0.3);
+	color: #0e2830;
+}
+
+/* === Status Bar === */
+#status_bar {
+	font-size: 8px;
+	color: rgba(16, 40, 48, 0.7);
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	margin-bottom: 4px;
+	position: relative;
+	z-index: 2;
+}
+
+#status_bar .status-right {
+	margin-left: auto;
+}
+
+#status_bar svg {
+	opacity: 0.6;
 }
 
 /* === Layout Rows === */
@@ -179,6 +205,10 @@ body {
 	letter-spacing: 0.3px;
 }
 
+.password-row .btn-dice {
+	right: 22px;
+}
+
 .password-row .btn-copy {
 	right: 4px;
 }
@@ -233,26 +263,6 @@ body {
 
 .bash-formula-code .btn-copy-bash:hover {
 	opacity: 0.8;
-}
-
-/* === Status Bar === */
-#status_bar {
-	font-size: 8px;
-	color: rgba(16, 40, 48, 0.7);
-	display: flex;
-	align-items: center;
-	gap: 5px;
-	margin-bottom: 4px;
-	position: relative;
-	z-index: 2;
-}
-
-#status_bar .status-right {
-	margin-left: auto;
-}
-
-#status_bar svg {
-	opacity: 0.6;
 }
 
 /* === Copy Feedback Toast === */
@@ -334,8 +344,4 @@ body {
 		width: calc(100% - 32px);
 		margin: 16px auto 0;
 	}
-}
-
-.password-row .btn-dice {
-	right: 22px;
 }
