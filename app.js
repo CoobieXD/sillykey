@@ -2,6 +2,7 @@
 	'use strict';
 
 	// --- Config ---
+	// All generation parameters as named constants
 	const PASSWORD_LENGTH = 24;
 	const CLEAR_TIMEOUT = 300;
 	const LEGACY_SALT = 'why not?';
