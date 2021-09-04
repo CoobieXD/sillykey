@@ -115,7 +115,7 @@
 	}
 
 	// --- Background ---
-	const bgA = $('#bg-a'); const bgB = $('#bg-b'); let bgCurrent = 'a';
+	const bgA = $('#bg-a'); const bgB = $('#bg-b'); let bgCurrent = 'a'; // which layer is visible
 	function buildGradient(hash) {
 		const h1 = parseInt(hash.substr(0, 3), 16) % 360; const h2 = parseInt(hash.substr(3, 3), 16) % 360;
 		const h3 = parseInt(hash.substr(6, 3), 16) % 360;
