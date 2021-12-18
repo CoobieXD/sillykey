@@ -28,7 +28,6 @@ body {
 #bg-b { opacity: 0; }
 
 /* === Car Key Fob Body === */
-
 #car_key {
 	background: linear-gradient(145deg, #1e3a44, #0c2028);
 	border: 1px solid rgba(255, 255, 255, 0.05);
@@ -44,6 +43,7 @@ body {
 		inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 
+
 /* === Display (LCD screen) === */
 #car_key_display {
 	background: linear-gradient(170deg, #5a7a86, #4a6872);
@@ -55,6 +55,20 @@ body {
 		inset 0 2px 6px rgba(0, 0, 0, 0.3),
 		inset 0 -1px 0 rgba(255, 255, 255, 0.1),
 		0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Subtle screen glare */
+#car_key_display::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 40%;
+	border-radius: 8px 8px 0 0;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 100%);
+	pointer-events: none;
+	z-index: 1;
 }
 
 /* === Form Elements === */
@@ -263,6 +277,11 @@ body {
 
 .bash-formula-code .btn-copy-bash:hover {
 	opacity: 0.8;
+}
+
+.bash-formula-code .btn-copy-bash svg {
+	width: 12px;
+	height: 12px;
 }
 
 /* === Copy Feedback Toast === */
