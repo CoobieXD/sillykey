@@ -2,9 +2,8 @@
 	'use strict';
 
 	// --- Config ---
-	// All generation parameters as named constants
 	const PASSWORD_LENGTH = 24;
-	const CLEAR_TIMEOUT = 300;
+	const CLEAR_TIMEOUT = 300; // seconds
 	const LEGACY_SALT = 'why not?';
 	const PBKDF2_ITERATIONS = 1000000;
 	const PBKDF2_SALT_PREFIX = 'sillykey:';
@@ -47,7 +46,7 @@
 
 	function startHashAnimation(method) {
 		stopHashAnimation();
-		const alphabet = method === 'legacy' ? ALPHABET_BASE58 : ALPHABET_BASE64URL;
+		const alphabet = (method === 'legacy' || method === 'pbkdf2-58') ? ALPHABET_BASE58 : ALPHABET_BASE64URL;
 		const step = () => { passwordEl.value = randomString(alphabet, PASSWORD_LENGTH); hashAnimationId = requestAnimationFrame(step); };
 		hashAnimationId = requestAnimationFrame(step);
 	}
@@ -58,10 +57,14 @@
 
 	// --- Utility ---
 	function arrayBufferToBase64url(buffer) {
-		const bytes = new Uint8Array(buffer);
-		let binary = '';
+		const bytes = new Uint8Array(buffer); let binary = '';
 		for (let i = 0; i < bytes.length; i++) { binary += String.fromCharCode(bytes[i]); }
 		return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+	}
+
+	function arrayBufferToBase58(buffer) {
+		const bytes = new Uint8Array(buffer);
+		return Base58.encode(Array.from(bytes));
 	}
 
 	function hex2ascii(s) {
@@ -81,7 +84,6 @@
 	// --- Generation methods ---
 	function generateLegacy(master, service, year) {
 		return new Promise((resolve) => {
-			// Always recreate worker to cancel previous computation
 			if (worker) worker.terminate();
 			worker = new Worker('worker.js');
 			const keys = master + service + year + LEGACY_SALT;
@@ -105,6 +107,13 @@
 		return arrayBufferToBase64url(bits).substr(0, PASSWORD_LENGTH);
 	}
 
+	async function generatePBKDF2_58(master, service, year) {
+		const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(master), 'PBKDF2', false, ['deriveBits']);
+		const salt = encoder.encode(PBKDF2_SALT_PREFIX + service + ':' + year);
+		const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' }, keyMaterial, 256);
+		return arrayBufferToBase58(bits).substr(0, PASSWORD_LENGTH);
+	}
+
 	// --- Identicon ---
 	function updateIdenticon(master) {
 		if (!master) { hashIconEl.style.display = 'none'; return; }
@@ -115,7 +124,7 @@
 	}
 
 	// --- Background ---
-	const bgA = $('#bg-a'); const bgB = $('#bg-b'); let bgCurrent = 'a'; // which layer is visible
+	const bgA = $('#bg-a'); const bgB = $('#bg-b'); let bgCurrent = 'a';
 	function buildGradient(hash) {
 		const h1 = parseInt(hash.substr(0, 3), 16) % 360; const h2 = parseInt(hash.substr(3, 3), 16) % 360;
 		const h3 = parseInt(hash.substr(6, 3), 16) % 360;
@@ -150,6 +159,7 @@
 			let pass;
 			if (method === 'legacy') { pass = await generateLegacy(master, service, year); }
 			else if (method === 'hmac') { pass = await generateHMAC(master, service, year); }
+			else if (method === 'pbkdf2-58') { pass = await generatePBKDF2_58(master, service, year); }
 			else { pass = await generatePBKDF2(master, service, year); }
 			stopHashAnimation(); passwordEl.value = pass;
 		} catch (err) { console.error('Generation error:', err); stopHashAnimation(); passwordEl.value = ''; }
@@ -158,7 +168,6 @@
 	// --- Clear ---
 	function purgeInput(el) { const fresh = el.cloneNode(false); el.parentNode.replaceChild(fresh, el); return fresh; }
 	function clearAll() {
-		// Save password before clearing to check clipboard
 		const lastPassword = passwordEl.value;
 		masterEl = purgeInput(masterEl); serviceEl = purgeInput(serviceEl);
 		passwordEl.value = ''; hashIconEl.style.display = 'none';
@@ -189,19 +198,20 @@
 		try { await navigator.clipboard.writeText(text); showCopyFeedback(); }
 		catch { const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showCopyFeedback(); }
 	}
-	function showCopyFeedback(text) {
-		copyFeedback.textContent = text || 'Copied'; copyFeedback.classList.add('show');
-		setTimeout(() => copyFeedback.classList.remove('show'), 1200);
-	}
+	function showCopyFeedback(text) { copyFeedback.textContent = text || 'Copied'; copyFeedback.classList.add('show'); setTimeout(() => copyFeedback.classList.remove('show'), 1200); }
 
 	// --- Random password ---
 	function generateRandom() {
 		const buf = new Uint8Array(PASSWORD_LENGTH); crypto.getRandomValues(buf);
 		let pass = '';
 		for (let i = 0; i < PASSWORD_LENGTH; i++) { pass += ALPHABET_ALNUM[buf[i] % ALPHABET_ALNUM.length]; }
-		startHashAnimation('hmac');
+		startHashAnimation('hmac-clean');
 		setTimeout(() => { stopHashAnimation(); passwordEl.value = pass; copyText(pass); }, 300);
 	}
+
+	// --- Eye toggle ---
+	let masterVisible = false;
+	function toggleMasterVisibility() { masterVisible = !masterVisible; masterEl.type = masterVisible ? 'text' : 'password'; btnEye.innerHTML = masterVisible ? SVG_EYE_OFF : SVG_EYE; }
 
 	// --- Year selector ---
 	function initYearSelector() {
@@ -218,9 +228,6 @@
 	const SVG_BATTERY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="10" x2="23" y2="14"/><rect x="3" y="8" width="4" height="8" fill="currentColor" rx="0.5"/><rect x="8" y="8" width="4" height="8" fill="currentColor" rx="0.5"/><rect x="13" y="8" width="4" height="8" fill="currentColor" rx="0.5"/></svg>';
 	const SVG_DICE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor" stroke="none"/></svg>';
 
-	let masterVisible = false;
-	function toggleMasterVisibility() { masterVisible = !masterVisible; masterEl.type = masterVisible ? 'text' : 'password'; btnEye.innerHTML = masterVisible ? SVG_EYE_OFF : SVG_EYE; }
-
 	// --- Init ---
 	function init() {
 		initYearSelector();
@@ -235,8 +242,8 @@
 		btnDice.addEventListener('click', generateRandom);
 		btnCopy.addEventListener('click', () => copyText(passwordEl.value));
 		btnCopyBash.addEventListener('click', () => copyText(bashCodeEl.textContent));
-		// Select password on click		passwordEl.addEventListener('click', function () { this.select(); });
-		// Clear clipboard on background click		document.body.addEventListener('click', (e) => {
+		passwordEl.addEventListener('click', function () { this.select(); });
+		document.body.addEventListener('click', (e) => {
 			if (e.target === document.body || e.target.classList.contains('bg-layer')) {
 				navigator.clipboard.writeText('').then(() => showCopyFeedback('Clipboard cleared'));
 			}
