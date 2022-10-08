@@ -25,20 +25,17 @@
 	const generatingEl = $('.generating-indicator');
 	const copyFeedback = $('#copy-feedback');
 
-	// --- State ---
 	let clearTimer = null;
 	let worker = null;
 	let debounceTimer = null;
 	let hashAnimationId = null;
 
-	// --- Hash animation ---
 	const ALPHABET_BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 	const ALPHABET_BASE64URL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 	const ALPHABET_ALNUM = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 	function randomString(alphabet, len) {
-		const buf = new Uint8Array(len);
-		crypto.getRandomValues(buf);
+		const buf = new Uint8Array(len); crypto.getRandomValues(buf);
 		let result = '';
 		for (let i = 0; i < len; i++) { result += alphabet[buf[i] % alphabet.length]; }
 		return result;
@@ -46,26 +43,27 @@
 
 	function startHashAnimation(method) {
 		stopHashAnimation();
-		const alphabet = (method === 'legacy' || method === 'pbkdf2-58') ? ALPHABET_BASE58 : ALPHABET_BASE64URL;
+		const alphabet = (method === 'legacy' || method === 'pbkdf2-58') ? ALPHABET_BASE58
+			: method === 'hmac-clean' ? ALPHABET_ALNUM : ALPHABET_BASE64URL;
 		const step = () => { passwordEl.value = randomString(alphabet, PASSWORD_LENGTH); hashAnimationId = requestAnimationFrame(step); };
 		hashAnimationId = requestAnimationFrame(step);
 	}
 
-	function stopHashAnimation() {
-		if (hashAnimationId !== null) { cancelAnimationFrame(hashAnimationId); hashAnimationId = null; }
-	}
+	function stopHashAnimation() { if (hashAnimationId !== null) { cancelAnimationFrame(hashAnimationId); hashAnimationId = null; } }
 
-	// --- Utility ---
 	function arrayBufferToBase64url(buffer) {
 		const bytes = new Uint8Array(buffer); let binary = '';
 		for (let i = 0; i < bytes.length; i++) { binary += String.fromCharCode(bytes[i]); }
 		return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 	}
 
-	function arrayBufferToBase58(buffer) {
-		const bytes = new Uint8Array(buffer);
-		return Base58.encode(Array.from(bytes));
+	function arrayBufferToBase64clean(buffer) {
+		const bytes = new Uint8Array(buffer); let binary = '';
+		for (let i = 0; i < bytes.length; i++) { binary += String.fromCharCode(bytes[i]); }
+		return btoa(binary).replace(/[+/=]/g, '');
 	}
+
+	function arrayBufferToBase58(buffer) { return Base58.encode(Array.from(new Uint8Array(buffer))); }
 
 	function hex2ascii(s) {
 		const hex = s.toString(); let str = '';
@@ -81,23 +79,25 @@
 
 	const encoder = new TextEncoder();
 
-	// --- Generation methods ---
 	function generateLegacy(master, service, year) {
 		return new Promise((resolve) => {
 			if (worker) worker.terminate();
 			worker = new Worker('worker.js');
-			const keys = master + service + year + LEGACY_SALT;
-			worker.postMessage(keys);
+			worker.postMessage(master + service + year + LEGACY_SALT);
 			worker.onmessage = function (e) { resolve(base58_encode(hex2ascii(e.data)).substr(0, PASSWORD_LENGTH)); };
 		});
 	}
 
 	async function generateHMAC(master, service, year) {
-		const keyData = encoder.encode(master);
-		const msgData = encoder.encode(service + ':' + year);
-		const key = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-		const sig = await crypto.subtle.sign('HMAC', key, msgData);
+		const key = await crypto.subtle.importKey('raw', encoder.encode(master), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+		const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(service + ':' + year));
 		return arrayBufferToBase64url(sig).substr(0, PASSWORD_LENGTH);
+	}
+
+	async function generateHMACclean(master, service, year) {
+		const key = await crypto.subtle.importKey('raw', encoder.encode(master), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+		const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(service + ':' + year));
+		return arrayBufferToBase64clean(sig).substr(0, PASSWORD_LENGTH);
 	}
 
 	async function generatePBKDF2(master, service, year) {
@@ -114,16 +114,13 @@
 		return arrayBufferToBase58(bits).substr(0, PASSWORD_LENGTH);
 	}
 
-	// --- Identicon ---
 	function updateIdenticon(master) {
 		if (!master) { hashIconEl.style.display = 'none'; return; }
 		const options = { size: 16, margin: 0, foreground: [16, 40, 48, 255], background: [0, 0, 0, 0], saturation: 0.5, format: 'svg' };
-		const data = new Identicon(sha256(master), options).toString();
-		hashIconEl.src = 'data:image/svg+xml;base64,' + data;
+		hashIconEl.src = 'data:image/svg+xml;base64,' + new Identicon(sha256(master), options).toString();
 		hashIconEl.style.display = 'block';
 	}
 
-	// --- Background ---
 	const bgA = $('#bg-a'); const bgB = $('#bg-b'); let bgCurrent = 'a';
 	function buildGradient(hash) {
 		const h1 = parseInt(hash.substr(0, 3), 16) % 360; const h2 = parseInt(hash.substr(3, 3), 16) % 360;
@@ -141,15 +138,16 @@
 		next.style.opacity = '1'; prev.style.opacity = '0'; bgCurrent = bgCurrent === 'a' ? 'b' : 'a';
 	}
 
-	// --- Bash formula ---
 	function updateBashFormula(method, service, year) {
 		if (method === 'hmac' && service) {
 			bashCodeEl.textContent = ` echo -n "${service}:${year}" | openssl dgst -sha256 -hmac "YOUR_MASTER" -binary | base64 | tr '+/' '-_' | head -c ${PASSWORD_LENGTH}`;
 			bashFormulaEl.classList.add('visible');
+		} else if (method === 'hmac-clean' && service) {
+			bashCodeEl.textContent = ` echo -n "${service}:${year}" | openssl dgst -sha256 -hmac "YOUR_MASTER" -binary | base64 | tr -d '+/=\\n' | head -c ${PASSWORD_LENGTH}`;
+			bashFormulaEl.classList.add('visible');
 		} else { bashFormulaEl.classList.remove('visible'); }
 	}
 
-	// --- Generate ---
 	async function generate() {
 		const master = masterEl.value; const service = serviceEl.value;
 		const year = yearEl.value; const method = methodEl.value;
@@ -159,13 +157,13 @@
 			let pass;
 			if (method === 'legacy') { pass = await generateLegacy(master, service, year); }
 			else if (method === 'hmac') { pass = await generateHMAC(master, service, year); }
+			else if (method === 'hmac-clean') { pass = await generateHMACclean(master, service, year); }
 			else if (method === 'pbkdf2-58') { pass = await generatePBKDF2_58(master, service, year); }
 			else { pass = await generatePBKDF2(master, service, year); }
 			stopHashAnimation(); passwordEl.value = pass;
 		} catch (err) { console.error('Generation error:', err); stopHashAnimation(); passwordEl.value = ''; }
 	}
 
-	// --- Clear ---
 	function purgeInput(el) { const fresh = el.cloneNode(false); el.parentNode.replaceChild(fresh, el); return fresh; }
 	function clearAll() {
 		const lastPassword = passwordEl.value;
@@ -179,7 +177,6 @@
 		masterEl.addEventListener('input', onInputChange); serviceEl.addEventListener('input', onInputChange);
 	}
 
-	// --- Debounced input ---
 	function onInputChange() {
 		if (clearTimer) clearTimeout(clearTimer);
 		clearTimer = setTimeout(clearAll, CLEAR_TIMEOUT * 1000);
@@ -188,11 +185,9 @@
 		else { stopHashAnimation(); passwordEl.value = ''; }
 		btnDice.style.display = (!masterEl.value && !serviceEl.value) ? '' : 'none';
 		if (debounceTimer) clearTimeout(debounceTimer);
-		const delay = method === 'legacy' ? 300 : 50;
-		debounceTimer = setTimeout(generate, delay);
+		debounceTimer = setTimeout(generate, method === 'legacy' ? 300 : 50);
 	}
 
-	// --- Copy ---
 	async function copyText(text) {
 		if (!text) return;
 		try { await navigator.clipboard.writeText(text); showCopyFeedback(); }
@@ -200,7 +195,6 @@
 	}
 	function showCopyFeedback(text) { copyFeedback.textContent = text || 'Copied'; copyFeedback.classList.add('show'); setTimeout(() => copyFeedback.classList.remove('show'), 1200); }
 
-	// --- Random password ---
 	function generateRandom() {
 		const buf = new Uint8Array(PASSWORD_LENGTH); crypto.getRandomValues(buf);
 		let pass = '';
@@ -209,17 +203,14 @@
 		setTimeout(() => { stopHashAnimation(); passwordEl.value = pass; copyText(pass); }, 300);
 	}
 
-	// --- Eye toggle ---
 	let masterVisible = false;
 	function toggleMasterVisibility() { masterVisible = !masterVisible; masterEl.type = masterVisible ? 'text' : 'password'; btnEye.innerHTML = masterVisible ? SVG_EYE_OFF : SVG_EYE; }
 
-	// --- Year selector ---
 	function initYearSelector() {
 		const currentYear = new Date().getFullYear(); yearEl.innerHTML = '';
 		for (let y = 2018; y <= currentYear; y++) { const opt = document.createElement('option'); opt.value = y; opt.textContent = y; if (y === currentYear) opt.selected = true; yearEl.appendChild(opt); }
 	}
 
-	// --- SVG Icons ---
 	const SVG_EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 	const SVG_EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 	const SVG_COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
@@ -228,7 +219,6 @@
 	const SVG_BATTERY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="10" x2="23" y2="14"/><rect x="3" y="8" width="4" height="8" fill="currentColor" rx="0.5"/><rect x="8" y="8" width="4" height="8" fill="currentColor" rx="0.5"/><rect x="13" y="8" width="4" height="8" fill="currentColor" rx="0.5"/></svg>';
 	const SVG_DICE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor" stroke="none"/></svg>';
 
-	// --- Init ---
 	function init() {
 		initYearSelector();
 		btnEye.innerHTML = SVG_EYE; btnCopy.innerHTML = SVG_COPY; btnDice.innerHTML = SVG_DICE; btnCopyBash.innerHTML = SVG_COPY;
