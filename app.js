@@ -207,7 +207,7 @@
 	function toggleMasterVisibility() { masterVisible = !masterVisible; masterEl.type = masterVisible ? 'text' : 'password'; btnEye.innerHTML = masterVisible ? SVG_EYE_OFF : SVG_EYE; }
 
 	function initYearSelector() {
-		const currentYear = new Date().getFullYear(); yearEl.innerHTML = '';
+		const currentYear = new Date().getFullYear(); yearEl.innerHTML = ''; // reset options
 		for (let y = 2018; y <= currentYear; y++) { const opt = document.createElement('option'); opt.value = y; opt.textContent = y; if (y === currentYear) opt.selected = true; yearEl.appendChild(opt); }
 	}
 
