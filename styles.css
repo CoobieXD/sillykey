@@ -272,6 +272,8 @@ body {
 	cursor: pointer;
 	opacity: 0.35;
 	padding: 2px;
+	font-family: inherit;
+	font-size: 9px;
 	transition: opacity 0.15s;
 }
 
