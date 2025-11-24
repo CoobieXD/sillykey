@@ -29,11 +29,11 @@
 
 			<div class="method-row">
 				<select id="method">
-					<option value="legacy">Legacy</option>
-					<option value="hmac">HMAC</option>
-					<option value="hmac-clean">HMAC-clean</option>
-					<option value="pbkdf2">PBKDF2</option>
-					<option value="pbkdf2-58">PBKDF2-58</option>
+					<option value="pbkdf2" hidden>PBKDF2 (compat)</option>
+					<option value="pbkdf2-58" selected>PBKDF2</option>
+					<option value="hmac" hidden>HMAC (compat)</option>
+					<option value="hmac-clean">HMAC</option>
+					<option value="legacy">Legacy (v1)</option>
 				</select>
 			</div>
 
