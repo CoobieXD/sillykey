@@ -1,0 +1,25 @@
+{
+	"name": "SillyKey",
+	"short_name": "SillyKey",
+	"start_url": ".",
+	"display": "standalone",
+	"theme_color": "#b8d4e3",
+	"background_color": "#b8d4e3",
+	"icons": [
+		{
+			"src": "favicon.png",
+			"sizes": "16x16",
+			"type": "image/png"
+		},
+		{
+			"src": "apple-touch-icon.png",
+			"sizes": "180x180",
+			"type": "image/png"
+		},
+		{
+			"src": "icon.ico",
+			"sizes": "48x48",
+			"type": "image/x-icon"
+		}
+	]
+}
