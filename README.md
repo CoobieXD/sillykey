@@ -2,6 +2,8 @@
 
 Deterministic password generator that runs entirely in the browser. One master password + service name + year = always the same unique password. Nothing is stored, nothing is transmitted, nothing to sync.
 
+**[Live Demo](https://coobiexd.github.io/sillykey/)**
+
 ## How It Works
 
 Enter your master password and a service name (e.g. `gmail`, `github`). SillyKey deterministically derives a unique 24-character password. Same input always produces the same output — no database, no cloud, no account needed.
