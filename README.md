@@ -109,13 +109,14 @@ index.html      — HTML markup
 styles.css      — All styles (key fob, form, bash formula, responsive)
 app.js          — Main logic: generation, UI, identicon, clipboard, timers
 worker.js       — Web Worker for Legacy method
-sha256.js       — SHA-256 (main thread, for identicon)
 sha256.min.js   — SHA-256 (js-sha256 library)
 base58.js       — Base58 encoding
 identicon.js    — SVG identicon generation
+manifest.json   — PWA manifest
+sw.js           — Service Worker (offline support)
 ```
 
-No external dependencies. No CDN. Everything runs locally.
+No external dependencies. No CDN. Everything runs locally. Works offline as a PWA.
 
 ## Development
 
