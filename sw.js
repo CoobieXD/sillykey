@@ -1,3 +1,4 @@
+// Bump version on deploy to invalidate old caches (e.g. sillykey-v2)
 const CACHE = 'sillykey-v1';
 const ASSETS = [
 	'./',

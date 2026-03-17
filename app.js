@@ -15,15 +15,14 @@
 	const yearEl = $('#year');
 	const methodEl = $('#method');
 	const passwordEl = $('#password');
-	const hashIconEl = $('#hash_icon');
+	const hashIconEl = $('#hash-icon');
 	const btnEye = $('#btn-eye');
 	const btnCopy = $('#btn-copy');
 	const btnDice = $('#btn-dice');
 	const btnCopyBash = $('#btn-copy-bash');
 	const bashFormulaEl = $('.bash-formula');
 	const bashCodeEl = $('#bash-code');
-	const generatingEl = $('.generating-indicator');
-	const copyFeedback = $('#copy-feedback');
+const copyFeedbackEl = $('#copy-feedback');
 
 	// --- State ---
 	let clearTimer = null;
@@ -94,17 +93,17 @@
 	}
 
 	// --- Utility: hex → ASCII (for legacy) ---
-	function hex2ascii(s) {
+	function hexToAscii(s) {
 		const hex = s.toString();
 		let str = '';
 		for (let n = 0; n < hex.length; n += 2) {
-			str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+			str += String.fromCharCode(parseInt(hex.substring(n, n + 2), 16));
 		}
 		return str;
 	}
 
 	// --- Utility: Base58 encode (for legacy) ---
-	function base58_encode(text) {
+	function base58Encode(text) {
 		const bytes = [];
 		for (let i = 0; i < text.length; i++) {
 			bytes.push(text[i].charCodeAt(0));
@@ -119,14 +118,17 @@
 
 	// Legacy (v1): Web Worker, 100k SHA-256 iterations
 	function generateLegacy(master, service, year) {
-		return new Promise((resolve) => {
+		return new Promise((resolve, reject) => {
 			if (worker) worker.terminate();
 			worker = new Worker('worker.js');
 			const keys = master + service + year + LEGACY_SALT;
 			worker.postMessage(keys);
 			worker.onmessage = function (e) {
-				const pass = base58_encode(hex2ascii(e.data));
-				resolve(pass.substr(0, PASSWORD_LENGTH));
+				const pass = base58Encode(hexToAscii(e.data));
+				resolve(pass.substring(0, PASSWORD_LENGTH));
+			};
+			worker.onerror = function (err) {
+				reject(new Error('Worker error: ' + err.message));
 			};
 		});
 	}
@@ -139,7 +141,7 @@
 			'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
 		);
 		const sig = await crypto.subtle.sign('HMAC', key, msgData);
-		return arrayBufferToBase64url(sig).substr(0, PASSWORD_LENGTH);
+		return arrayBufferToBase64url(sig).substring(0, PASSWORD_LENGTH);
 	}
 
 	// HMAC-clean: HMAC-SHA256, base64 without special chars
@@ -150,10 +152,10 @@
 			'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
 		);
 		const sig = await crypto.subtle.sign('HMAC', key, msgData);
-		return arrayBufferToBase64clean(sig).substr(0, PASSWORD_LENGTH);
+		return arrayBufferToBase64clean(sig).substring(0, PASSWORD_LENGTH);
 	}
 
-	// PBKDF2: crypto.subtle, 600k iterations
+	// PBKDF2: crypto.subtle, 1M iterations
 	async function generatePBKDF2(master, service, year) {
 		const keyMaterial = await crypto.subtle.importKey(
 			'raw', encoder.encode(master), 'PBKDF2', false, ['deriveBits']
@@ -163,7 +165,7 @@
 			{ name: 'PBKDF2', salt: salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
 			keyMaterial, 256
 		);
-		return arrayBufferToBase64url(bits).substr(0, PASSWORD_LENGTH);
+		return arrayBufferToBase64url(bits).substring(0, PASSWORD_LENGTH);
 	}
 
 	// PBKDF2-58: same as PBKDF2 but base58 output
@@ -176,7 +178,7 @@
 			{ name: 'PBKDF2', salt: salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
 			keyMaterial, 256
 		);
-		return arrayBufferToBase58(bits).substr(0, PASSWORD_LENGTH);
+		return arrayBufferToBase58(bits).substring(0, PASSWORD_LENGTH);
 	}
 
 	// --- Identicon ---
@@ -204,13 +206,13 @@
 	let bgCurrent = 'a'; // which layer is visible
 
 	function buildGradient(hash) {
-		const h1 = parseInt(hash.substr(0, 3), 16) % 360;
-		const h2 = parseInt(hash.substr(3, 3), 16) % 360;
-		const h3 = parseInt(hash.substr(6, 3), 16) % 360;
-		const x1 = parseInt(hash.substr(9, 2), 16) % 80 + 10;
-		const y1 = parseInt(hash.substr(11, 2), 16) % 80 + 10;
-		const x2 = parseInt(hash.substr(13, 2), 16) % 80 + 10;
-		const y2 = parseInt(hash.substr(15, 2), 16) % 80 + 10;
+		const h1 = parseInt(hash.substring(0, 3), 16) % 360;
+		const h2 = parseInt(hash.substring(3, 6), 16) % 360;
+		const h3 = parseInt(hash.substring(6, 9), 16) % 360;
+		const x1 = parseInt(hash.substring(9, 11), 16) % 80 + 10;
+		const y1 = parseInt(hash.substring(11, 13), 16) % 80 + 10;
+		const x2 = parseInt(hash.substring(13, 15), 16) % 80 + 10;
+		const y2 = parseInt(hash.substring(15, 17), 16) % 80 + 10;
 		return `radial-gradient(ellipse at ${x1}% ${y1}%, hsla(${h1}, 80%, 65%, 0.5) 0%, transparent 55%),
 			radial-gradient(ellipse at ${x2}% ${y2}%, hsla(${h2}, 70%, 60%, 0.4) 0%, transparent 50%),
 			linear-gradient(${h3}deg, hsla(${h1}, 50%, 85%, 1), hsla(${h2}, 45%, 80%, 1))`;
@@ -292,7 +294,7 @@
 
 		if (!master || !service) {
 			stopHashAnimation();
-			passwordEl.value = '';
+				passwordEl.value = '';
 			return;
 		}
 
@@ -310,11 +312,11 @@
 				pass = await generatePBKDF2(master, service, year);
 			}
 			stopHashAnimation();
-			passwordEl.value = pass;
+				passwordEl.value = pass;
 		} catch (err) {
 			console.error('Generation error:', err);
 			stopHashAnimation();
-			passwordEl.value = '';
+				passwordEl.value = '';
 		}
 	}
 
@@ -339,7 +341,6 @@
 			}).catch(() => {});
 		}
 		bashFormulaEl.classList.remove('visible');
-		generatingEl.classList.remove('active');
 		stopHashAnimation();
 		if (worker) { worker.terminate(); worker = null; }
 		if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
@@ -356,7 +357,7 @@
 
 		const method = methodEl.value;
 
-		// Start animation immediately
+		// Start animation and show generating indicator
 		if (masterEl.value && serviceEl.value) {
 			startHashAnimation(method);
 		} else {
@@ -392,9 +393,9 @@
 	}
 
 	function showCopyFeedback(text) {
-		copyFeedback.textContent = text || 'Copied';
-		copyFeedback.classList.add('show');
-		setTimeout(() => copyFeedback.classList.remove('show'), 1200);
+		copyFeedbackEl.textContent = text || 'Copied';
+		copyFeedbackEl.classList.add('show');
+		setTimeout(() => copyFeedbackEl.classList.remove('show'), 1200);
 	}
 
 	// --- Random password ---
@@ -441,7 +442,7 @@
 		btnCopyBash.innerHTML = SVG_COPY;
 
 		// Status bar icons
-		const statusBar = $('#status_bar');
+		const statusBar = $('#status-bar');
 		statusBar.querySelector('.icon-signal').innerHTML = SVG_SIGNAL;
 		statusBar.querySelector('.icon-lock').innerHTML = SVG_LOCK;
 		statusBar.querySelector('.icon-battery').innerHTML = SVG_BATTERY;

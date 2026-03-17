@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>SillyKey</title>
+	<meta name="description" content="Deterministic password generator - derive strong, reproducible passwords from a master key">
 	<link rel="icon" href="favicon.png" sizes="16x16">
 	<link rel="apple-touch-icon" href="apple-touch-icon.png">
 	<meta name="apple-mobile-web-app-title" content="SillyKey">
@@ -19,9 +20,9 @@
 
 	<div id="copy-feedback">Copied</div>
 
-	<div id="car_key">
-		<div id="car_key_display">
-			<div id="status_bar">
+	<div id="car-key">
+		<div id="car-key-display">
+			<div id="status-bar">
 				<span class="icon-signal" style="width:10px;height:10px;display:inline-block;"></span>
 				<span class="icon-lock" style="width:10px;height:10px;display:inline-block;"></span>
 				<span class="status-right">
@@ -31,6 +32,7 @@
 
 			<div class="method-row">
 				<select id="method">
+					<!-- Hidden compat options: kept for backward compatibility with old passwords, not shown in UI -->
 					<option value="pbkdf2" hidden>PBKDF2 (compat)</option>
 					<option value="pbkdf2-58" selected>PBKDF2</option>
 					<option value="hmac" hidden>HMAC (compat)</option>
@@ -41,7 +43,7 @@
 
 			<div class="master-row">
 				<input id="master" type="password" placeholder="master" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-				<img id="hash_icon" src="" alt="">
+				<img id="hash-icon" src="" alt="Master password fingerprint">
 				<button class="btn-icon" id="btn-eye" type="button" aria-label="Toggle password visibility"></button>
 			</div>
 
@@ -59,8 +61,6 @@
 				<button class="btn-icon btn-dice" id="btn-dice" type="button" aria-label="Generate random password"></button>
 				<button class="btn-icon btn-copy" id="btn-copy" type="button" aria-label="Copy password"></button>
 			</div>
-
-			<div class="generating-indicator">Generating</div>
 		</div>
 	</div>
 

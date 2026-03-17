@@ -28,7 +28,7 @@ body {
 #bg-b { opacity: 0; }
 
 /* === Car Key Fob Body === */
-#car_key {
+#car-key {
 	background: linear-gradient(145deg, #1e3a44, #0c2028);
 	border: 1px solid rgba(255, 255, 255, 0.05);
 	border-radius: 20px;
@@ -45,7 +45,7 @@ body {
 
 
 /* === Display (LCD screen) === */
-#car_key_display {
+#car-key-display {
 	background: linear-gradient(170deg, #5a7a86, #4a6872);
 	padding: 8px 10px 10px;
 	border-radius: 8px;
@@ -58,7 +58,7 @@ body {
 }
 
 /* Subtle screen glare */
-#car_key_display::before {
+#car-key-display::before {
 	content: '';
 	position: absolute;
 	top: 0;
@@ -72,8 +72,8 @@ body {
 }
 
 /* === Form Elements === */
-#car_key_display input,
-#car_key_display select {
+#car-key-display input,
+#car-key-display select {
 	background: transparent;
 	border: 0;
 	border-bottom: 1px solid rgba(16, 40, 48, 0.25);
@@ -93,24 +93,24 @@ body {
 	transition: border-color 0.2s;
 }
 
-#car_key_display input:focus,
-#car_key_display select:focus {
+#car-key-display input:focus,
+#car-key-display select:focus {
 	outline: none;
 	border-bottom-color: rgba(16, 40, 48, 0.6);
 }
 
-#car_key_display input::placeholder {
+#car-key-display input::placeholder {
 	color: #3a5660;
 	font-weight: 400;
 }
 
-#car_key_display input::selection {
+#car-key-display input::selection {
 	background: rgba(16, 40, 48, 0.3);
 	color: #0e2830;
 }
 
 /* === Status Bar === */
-#status_bar {
+#status-bar {
 	font-size: 8px;
 	color: rgba(16, 40, 48, 0.7);
 	display: flex;
@@ -121,11 +121,11 @@ body {
 	z-index: 2;
 }
 
-#status_bar .status-right {
+#status-bar .status-right {
 	margin-left: auto;
 }
 
-#status_bar svg {
+#status-bar svg {
 	opacity: 0.6;
 }
 
@@ -170,7 +170,7 @@ body {
 	padding-right: 46px !important;
 }
 
-#hash_icon {
+#hash-icon {
 	position: absolute;
 	width: 16px;
 	height: 16px;
@@ -309,31 +309,6 @@ body {
 	transform: translateX(-50%) translateY(0);
 }
 
-/* === Generating Indicator === */
-.generating-indicator {
-	display: none;
-	font-size: 9px;
-	color: rgba(16, 40, 48, 0.5);
-	padding: 2px 0 0;
-	position: relative;
-	z-index: 2;
-}
-
-.generating-indicator.active {
-	display: block;
-}
-
-.generating-indicator::after {
-	content: '';
-	animation: dots 1.2s steps(4, end) infinite;
-}
-
-@keyframes dots {
-	0% { content: ''; }
-	25% { content: '.'; }
-	50% { content: '..'; }
-	75% { content: '...'; }
-}
 
 /* === Mobile === */
 @media only screen and (max-width: 720px) {
@@ -341,7 +316,7 @@ body {
 		background: #b8d4e3;
 	}
 
-	#car_key {
+	#car-key {
 		border: none;
 		border-radius: 20px;
 		width: calc(100% - 32px);
@@ -353,8 +328,8 @@ body {
 			inset 0 1px 0 rgba(255, 255, 255, 0.06);
 	}
 
-	#car_key_display input,
-	#car_key_display select {
+	#car-key-display input,
+	#car-key-display select {
 		font-size: 16px;
 		padding: 4px 0;
 	}
